@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:id="@+id/navigation_graph"
+  app:startDestination="@id/flagListFragment">
+  
+  <fragment
+    android:id="@+id/flagListFragment"
+    android:name="dev.huannguyen.flags.ui.FlagListFragment"
+    android:label="@string/flag_list_title"
+    tools:layout="@layout/list_fragment">
+    <action
+      android:id="@+id/action_list_to_details"
+      app:destination="@id/flagDetailsFragment"
+      app:popUpTo="@+id/flagListFragment" />
+  </fragment>
+  
+  <fragment
+    android:id="@+id/flagDetailsFragment"
+    android:name="dev.huannguyen.flags.ui.FlagDetailsFragment"
+    tools:layout="@layout/details_fragment" />
+</navigation>

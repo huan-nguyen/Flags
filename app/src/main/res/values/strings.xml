@@ -1,0 +1,13 @@
+<resources>
+  <string name="app_name">Flags</string>
+  <string name="flag_list_error_message">Unable to retrieve data :(</string>
+  <string name="flag_list_title">Flags</string>
+  <string name="capital">Capital</string>
+  <string name="population">Population</string>
+  <string name="countries">Countries</string>
+  <string name="language">Language</string>
+  <string name="currency">Currency</string>
+  <string name="timezone">Timezone</string>
+
+</resources>
+
