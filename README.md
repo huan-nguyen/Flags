@@ -1,6 +1,6 @@
 # What is this for?
-To showcase the usage an Android app architecture based on Coroutine and Architecture Component. 
-Also include demo of various of Android framework/Kotlin features:
+To showcase an Android app architecture based on Coroutine and Architecture Component. 
+Also include the demo of various Android framework/Kotlin features:
 
 * Navigation Component
 * Material Components
