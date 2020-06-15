@@ -1,19 +1,17 @@
 package dev.huannguyen.flags.data
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 interface FlagRepo {
-    suspend fun getFlags(): DataResponse<List<FlagApiModel>>
+    suspend fun getFlags(): DataResponse<List<FlagDataModel>>
 }
 
 class FlagRepoImpl(
-    private val webServices: WebServices,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val webServices: WebServices
 ) : FlagRepo {
-    override suspend fun getFlags(): DataResponse<List<FlagApiModel>> = withContext(dispatcher) {
+    override suspend fun getFlags(): DataResponse<List<FlagDataModel>> = withContext(Dispatchers.IO) {
         try {
             val response = webServices.getFlags()
             response.body()?.let { data ->
@@ -25,6 +23,6 @@ class FlagRepoImpl(
             Timber.e("Unable to retrieve data from network.")
         }
 
-        return@withContext DataResponse.Failure<List<FlagApiModel>>("Unable to retrieve data")
+        return@withContext DataResponse.Failure("Unable to retrieve data")
     }
 }

@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import dev.huannguyen.flags.R
 import dev.huannguyen.flags.data.DataResponse
-import dev.huannguyen.flags.data.FlagApiModel
+import dev.huannguyen.flags.data.FlagDataModel
 import dev.huannguyen.flags.data.FlagRepo
 import dev.huannguyen.flags.data.FlagRepoImpl
 import dev.huannguyen.flags.di.NetworkComponent
@@ -30,8 +30,7 @@ class FlagListViewModel(private val repo: FlagRepo) : ViewModel() {
             }
 
             is DataResponse.Failure -> {
-                flagData.value =
-                    UiState.Failure(message = R.string.flag_list_error_message)
+                flagData.value = UiState.Failure(message = R.string.flag_list_error_message)
             }
         }
     }
@@ -44,7 +43,7 @@ class FlagListViewModel(private val repo: FlagRepo) : ViewModel() {
  *
  * This place would be a great place for such data mapping/transformation.
  */
-private fun FlagApiModel.toFlagModel() = Flag(
+private fun FlagDataModel.toFlagModel() = Flag(
     country = country,
     capital = capital,
     population = population,
@@ -55,9 +54,9 @@ private fun FlagApiModel.toFlagModel() = Flag(
 )
 
 @Suppress("UNCHECKED_CAST")
-class FlagListViewModelFactory(private val networkComponent: NetworkComponent) : ViewModelProvider.Factory {
+class FlagListViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return FlagListViewModel(FlagRepoImpl(networkComponent.webServices)) as T
+        return FlagListViewModel(FlagRepoImpl(NetworkComponent.webServices)) as T
     }
 }
 

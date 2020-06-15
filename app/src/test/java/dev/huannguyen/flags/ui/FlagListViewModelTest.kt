@@ -7,10 +7,11 @@ import com.nhaarman.mockito_kotlin.whenever
 import dev.huannguyen.flags.CoroutineTestRule
 import dev.huannguyen.flags.R
 import dev.huannguyen.flags.data.DataResponse
-import dev.huannguyen.flags.data.FlagApiModel
+import dev.huannguyen.flags.data.FlagDataModel
 import dev.huannguyen.flags.data.FlagRepo
 import dev.huannguyen.flags.domain.Flag
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -22,12 +23,11 @@ class FlagListViewModelTest {
     private lateinit var observer: LiveDataTestObserver<UiState>
     private lateinit var flagListViewModel: FlagListViewModel
 
-    @Rule
-    @JvmField
-    val taskExecutorRule = InstantTaskExecutorRule()
+    @get:Rule
+    val liveDataTestRule = InstantTaskExecutorRule()
 
-    @Rule
-    @JvmField
+    @ExperimentalCoroutinesApi
+    @get:Rule
     val coroutineTestRule = CoroutineTestRule()
 
     @Before
@@ -45,9 +45,9 @@ class FlagListViewModelTest {
 
     @Test
     fun `If flagRepo returns proper data, produce InProgress and then Success UiState`() =
-        coroutineTestRule.testDispatcher.runBlockingTest {
+        runBlocking {
             val fakeFlagData = listOf(
-                FlagApiModel(
+                FlagDataModel(
                     "Australia",
                     "Canberra",
                     24117360,
@@ -56,7 +56,7 @@ class FlagListViewModelTest {
                     "Australian dollar",
                     "UTC+10:00"
                 ),
-                FlagApiModel(
+                FlagDataModel(
                     "Finland",
                     "Helsinki",
                     5491817,
@@ -102,7 +102,7 @@ class FlagListViewModelTest {
 
     @Test
     fun `If flagRepo returns error, produce InProgress and then Failure UiState`() =
-        coroutineTestRule.testDispatcher.runBlockingTest {
+        runBlocking {
             whenever(repo.getFlags()).thenReturn(DataResponse.Failure(""))
 
             flagListViewModel.getFlags()

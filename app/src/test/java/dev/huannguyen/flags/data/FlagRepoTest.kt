@@ -4,8 +4,7 @@ import android.accounts.NetworkErrorException
 import com.nhaarman.mockito_kotlin.given
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import okhttp3.ResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -13,20 +12,19 @@ import org.junit.Test
 import retrofit2.Response
 
 class FlagRepoTest {
-
     private lateinit var webServices: WebServices
     private lateinit var flagRepo: FlagRepo
 
     @Before
     fun setup() {
         webServices = mock()
-        flagRepo = FlagRepoImpl(webServices, Dispatchers.Unconfined)
+        flagRepo = FlagRepoImpl(webServices)
     }
 
     @Test
-    fun `If webservices return data, produce Success data response`() = runBlockingTest {
+    fun `If webservices return data, produce Success data response`() = runBlocking {
         val fakeFlagData = listOf(
-            FlagApiModel(
+            FlagDataModel(
                 "Australia",
                 "Canberra",
                 24117360,
@@ -35,7 +33,7 @@ class FlagRepoTest {
                 "Australian dollar",
                 "UTC+10:00"
             ),
-            FlagApiModel(
+            FlagDataModel(
                 "Finland",
                 "Helsinki",
                 5491817,
@@ -54,20 +52,21 @@ class FlagRepoTest {
     }
 
     @Test
-    fun `If webservices return error, produce Failure data response`() = runBlockingTest {
-        whenever(webServices.getFlags()).thenReturn(Response.error(400, ResponseBody.create(null, "error content")))
+    fun `If webservices return error, produce Failure data response`() = runBlocking {
+        whenever(webServices.getFlags())
+            .thenReturn(Response.error(400, ResponseBody.create(null, "error content")))
 
         val dataResponse = flagRepo.getFlags()
 
-        assertEquals(DataResponse.Failure<FlagApiModel>(message = "Unable to retrieve data"), dataResponse)
+        assertEquals(DataResponse.Failure(message = "Unable to retrieve data"), dataResponse)
     }
 
     @Test
-    fun `If webservices throws exception, produce Failure data response`() = runBlockingTest {
+    fun `If webservices throws exception, produce Failure data response`() = runBlocking {
         given(webServices.getFlags()).willAnswer { throw NetworkErrorException() }
 
         val dataResponse = flagRepo.getFlags()
 
-        assertEquals(DataResponse.Failure<FlagApiModel>(message = "Unable to retrieve data"), dataResponse)
+        assertEquals(DataResponse.Failure(message = "Unable to retrieve data"), dataResponse)
     }
 }

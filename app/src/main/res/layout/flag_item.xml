@@ -22,5 +22,6 @@
     android:textColor="?android:attr/textColorPrimary"
     tools:text="Australia"
     android:layout_gravity="bottom"
+    android:gravity="center_horizontal"
     android:background="#80000000"/>
 </FrameLayout>

@@ -12,7 +12,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import dev.huannguyen.flags.App
 import dev.huannguyen.flags.R
 import dev.huannguyen.flags.domain.Flag
 import kotlinx.android.synthetic.main.list_fragment.errorMessage
@@ -21,12 +20,8 @@ import kotlinx.android.synthetic.main.list_fragment.progressBar
 
 class FlagListFragment : Fragment() {
 
-    private val networkComponent by lazy { (requireActivity().application as App).networkComponent }
-
     private val viewModel by lazy {
-        ViewModelProvider(this,
-            FlagListViewModelFactory(networkComponent)
-        ).get(FlagListViewModel::class.java)
+        ViewModelProvider(this, FlagListViewModelFactory()).get(FlagListViewModel::class.java)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -68,7 +63,7 @@ class FlagListFragment : Fragment() {
     }
 
     private fun subscribeToData(view: View) {
-        viewModel.flags.observe(this, Observer { state ->
+        viewModel.flags.observe(viewLifecycleOwner, Observer { state ->
             when (state) {
                 is UiState.Success -> {
                     errorMessage.hide()
@@ -90,7 +85,7 @@ class FlagListFragment : Fragment() {
                 }
             }
 
-            // Wait until the view is about to drawn to start the postponed shared element transition
+            // Wait until the view is about to draw to start the postponed shared element transition
             (view.parent as? ViewGroup)?.doOnPreDraw {
                 startPostponedEnterTransition()
             }
