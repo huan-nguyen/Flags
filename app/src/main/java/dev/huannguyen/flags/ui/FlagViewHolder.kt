@@ -4,24 +4,30 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import dev.huannguyen.flags.domain.Flag
-import kotlinx.android.synthetic.main.details_fragment.view.imageView
+import kotlinx.android.synthetic.main.flag_item.view.imageView
 import kotlinx.android.synthetic.main.flag_item.view.name
+import kotlinx.coroutines.channels.BroadcastChannel
 
-interface OnItemClickListener {
-    fun onClick(data: Flag, sharedElement: View)
-}
+class FlagViewHolder(
+    itemView: View,
+    eventChannel: BroadcastChannel<Pair<View, Flag>>
+) : RecyclerView.ViewHolder(itemView) {
+    private var data: Flag? = null
 
-class FlagViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    init {
+        itemView.setOnClickListener {
+            eventChannel.offer(it.imageView to requireNotNull(data))
+        }
+    }
 
-    fun populate(data: Flag, clickListener: OnItemClickListener) {
+    fun populate(data: Flag) {
+        this.data = data
         data.run {
             Picasso.get()
                 .load(url)
                 .into(itemView.imageView)
 
             itemView.name.text = country
-
-            itemView.setOnClickListener { clickListener.onClick(data, itemView.imageView) }
             // For shared element transition purposes. Assuming country name is unique
             itemView.imageView.transitionName = country
         }
