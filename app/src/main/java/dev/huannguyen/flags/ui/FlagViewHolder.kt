@@ -15,7 +15,7 @@ class FlagViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     fun populate(data: Flag, clickListener: OnItemClickListener) {
         data.run {
-            Picasso.with(itemView.context)
+            Picasso.get()
                 .load(url)
                 .into(itemView.imageView)
 

@@ -31,7 +31,7 @@ class FlagDetailsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Picasso.with(context)
+        Picasso.get()
             .load(flag.url)
             .into(imageView)
 
