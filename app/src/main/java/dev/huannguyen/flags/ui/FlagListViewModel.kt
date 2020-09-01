@@ -7,25 +7,53 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import dev.huannguyen.flags.R
 import dev.huannguyen.flags.data.DataResponse
-import dev.huannguyen.flags.data.FlagDataModel
 import dev.huannguyen.flags.data.FlagRepo
-import dev.huannguyen.flags.data.FlagRepoImpl
-import dev.huannguyen.flags.di.NetworkComponent
+import dev.huannguyen.flags.data.source.local.LocalFlagData
+import dev.huannguyen.flags.di.ServiceLocator
 import dev.huannguyen.flags.domain.Flag
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
+import timber.log.Timber
 
-class FlagListViewModel(repo: FlagRepo) : ViewModel() {
-    val flags: LiveData<UiState> = repo.flags()
-        .map { it.toUiState() }
-        .onStart { emit(UiState.InProgress) }
-        .asLiveData()
+class FlagListViewModel(private val repo: FlagRepo) : ViewModel() {
+    private val fetchEvents = BroadcastChannel<Unit>(1)
+
+    val flags: LiveData<UiState> = createLiveData()
+
+    fun fetch() {
+        fetchEvents.offer(Unit)
+    }
+
+    private fun createLiveData(): LiveData<UiState> {
+        val flagsData = repo.flags().map { it.toUiState() }
+        val fetchResults = fetchEvents.asFlow()
+            .flatMapConcat { repo.fetch() }
+            .map { it.toUiState() }
+
+        return merge(flagsData, fetchResults)
+            .distinctUntilChanged()
+            .onStart { emit(UiState.InProgress) }
+            .asLiveData()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Timber.d("cleared")
+    }
 }
 
-private fun DataResponse<List<FlagDataModel>>.toUiState() = when (this) {
+private fun DataResponse<List<LocalFlagData>>.toUiState() = when (this) {
     is DataResponse.Success -> UiState.Success(data = data.map { it.toFlagModel() })
     is DataResponse.Failure -> UiState.Failure(message = R.string.flag_list_error_message)
+    is DataResponse.Fetching -> UiState.InProgress
 }
+
+private fun List<LocalFlagData>.toUiState(): UiState = UiState.Success(data = map { it.toFlagModel() })
 
 /**
  * Trivial example of data mapping here. However in reality this mapping would perhaps
@@ -34,7 +62,7 @@ private fun DataResponse<List<FlagDataModel>>.toUiState() = when (this) {
  *
  * This place would be a great place for such data mapping/transformation.
  */
-private fun FlagDataModel.toFlagModel() = Flag(
+private fun LocalFlagData.toFlagModel() = Flag(
     country = country,
     capital = capital,
     population = population,
@@ -47,7 +75,7 @@ private fun FlagDataModel.toFlagModel() = Flag(
 @Suppress("UNCHECKED_CAST")
 class FlagListViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return FlagListViewModel(FlagRepoImpl(NetworkComponent.webServices)) as T
+        return FlagListViewModel(ServiceLocator.flagRepo) as T
     }
 }
 

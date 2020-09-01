@@ -1,15 +1,10 @@
-package dev.huannguyen.flags.data
+package dev.huannguyen.flags.data.source.remote
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
-sealed class DataResponse<out T> {
-    data class Success<T>(val data: T) : DataResponse<T>()
-    data class Failure(val message: String) : DataResponse<Nothing>()
-}
-
 @JsonClass(generateAdapter = true)
-data class FlagDataModel(
+data class RemoteFlagData(
     @Json(name = "country_name") val country: String,
     @Json(name = "country_capital") val capital: String,
     @Json(name = "recent_population") val population: Int,

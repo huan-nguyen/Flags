@@ -7,9 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -17,9 +16,10 @@ import dev.huannguyen.flags.R
 import dev.huannguyen.flags.domain.Flag
 import kotlinx.android.synthetic.main.list_fragment.errorMessage
 import kotlinx.android.synthetic.main.list_fragment.flagList
-import kotlinx.android.synthetic.main.list_fragment.progressBar
+import kotlinx.android.synthetic.main.list_fragment.swipeToRefresh
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import reactivecircus.flowbinding.swiperefreshlayout.refreshes
 
 class FlagListFragment : Fragment() {
 
@@ -40,6 +40,10 @@ class FlagListFragment : Fragment() {
             // (if not the view would not be ready for a shared element transition to happen).
             postponeEnterTransition()
         }
+
+        swipeToRefresh.refreshes().onEach {
+            viewModel.fetch()
+        }.launchIn(lifecycleScope)
     }
 
     private fun setupFlagList() {
@@ -51,7 +55,7 @@ class FlagListFragment : Fragment() {
         flagList.adapter = FlagAdapter().also {
             it.clicks
                 .onEach { (view, data) -> showDetails(view, data) }
-                .launchIn(viewModel.viewModelScope)
+                .launchIn(lifecycleScope)
         }
     }
 
@@ -67,17 +71,17 @@ class FlagListFragment : Fragment() {
     }
 
     private fun subscribeToData(view: View) {
-        viewModel.flags.observe(viewLifecycleOwner, Observer { state ->
+        viewModel.flags.observe(viewLifecycleOwner, { state ->
             when (state) {
                 is UiState.Success -> {
                     errorMessage.hide()
-                    progressBar.hide()
+                    swipeToRefresh.isRefreshing = false
                     flagList.show()
                     (flagList.adapter as FlagAdapter).set(state.data)
                 }
 
                 is UiState.Failure -> {
-                    progressBar.hide()
+                    swipeToRefresh.isRefreshing = false
                     flagList.hide()
                     errorMessage.show()
                     errorMessage.text = getString(state.message)
@@ -85,7 +89,7 @@ class FlagListFragment : Fragment() {
 
                 is UiState.InProgress -> {
                     errorMessage.hide()
-                    progressBar.show()
+                    swipeToRefresh.isRefreshing = true
                 }
             }
 
