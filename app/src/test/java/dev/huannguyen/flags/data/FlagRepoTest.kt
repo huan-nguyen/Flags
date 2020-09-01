@@ -4,6 +4,7 @@ import android.accounts.NetworkErrorException
 import com.nhaarman.mockito_kotlin.given
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import okhttp3.ResponseBody
 import org.junit.Assert.assertEquals
@@ -46,9 +47,9 @@ class FlagRepoTest {
 
         whenever(webServices.getFlags()).thenReturn(Response.success(fakeFlagData))
 
-        val dataResponse = flagRepo.getFlags()
+        val dataResponse = flagRepo.flags()
 
-        assertEquals(DataResponse.Success(data = fakeFlagData), dataResponse)
+        assertEquals(listOf(DataResponse.Success(data = fakeFlagData)), dataResponse.toList())
     }
 
     @Test
@@ -56,17 +57,17 @@ class FlagRepoTest {
         whenever(webServices.getFlags())
             .thenReturn(Response.error(400, ResponseBody.create(null, "error content")))
 
-        val dataResponse = flagRepo.getFlags()
+        val dataResponse = flagRepo.flags()
 
-        assertEquals(DataResponse.Failure(message = "Unable to retrieve data"), dataResponse)
+        assertEquals(listOf(DataResponse.Failure(message = "Unable to retrieve data")), dataResponse.toList())
     }
 
     @Test
     fun `If webservices throws exception, produce Failure data response`() = runBlocking {
         given(webServices.getFlags()).willAnswer { throw NetworkErrorException() }
 
-        val dataResponse = flagRepo.getFlags()
+        val dataResponse = flagRepo.flags()
 
-        assertEquals(DataResponse.Failure(message = "Unable to retrieve data"), dataResponse)
+        assertEquals(listOf(DataResponse.Failure(message = "Unable to retrieve data")), dataResponse.toList())
     }
 }

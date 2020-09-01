@@ -35,10 +35,7 @@ class FlagListFragment : Fragment() {
         setupFlagList()
         subscribeToData(view)
 
-        // If no data is held by view model, we need to fetch data from network
-        if (viewModel.flags.value == null) {
-            viewModel.getFlags()
-        } else {
+        if (viewModel.flags.value != null) {
             // Used for shared element transition. We need to postpone the transition until the data is loaded
             // (if not the view would not be ready for a shared element transition to happen).
             postponeEnterTransition()

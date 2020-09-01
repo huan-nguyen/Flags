@@ -11,6 +11,7 @@ import dev.huannguyen.flags.data.FlagDataModel
 import dev.huannguyen.flags.data.FlagRepo
 import dev.huannguyen.flags.domain.Flag
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -34,8 +35,6 @@ class FlagListViewModelTest {
     fun setup() {
         repo = mock()
         observer = LiveDataTestObserver()
-        flagListViewModel = FlagListViewModel(repo)
-        flagListViewModel.flags.observeForever(observer)
     }
 
     @After
@@ -67,9 +66,10 @@ class FlagListViewModelTest {
                 )
             )
 
-            whenever(repo.getFlags()).thenReturn(DataResponse.Success(fakeFlagData))
+            whenever(repo.flags()).thenReturn(flowOf(DataResponse.Success(fakeFlagData)))
 
-            flagListViewModel.getFlags().join()
+            flagListViewModel = FlagListViewModel(repo)
+            flagListViewModel.flags.observeForever(observer)
 
             observer.assertChangedValues(
                 listOf(
@@ -103,9 +103,10 @@ class FlagListViewModelTest {
     @Test
     fun `If flagRepo returns error, produce InProgress and then Failure UiState`() =
         runBlocking {
-            whenever(repo.getFlags()).thenReturn(DataResponse.Failure(""))
+            whenever(repo.flags()).thenReturn(flowOf(DataResponse.Failure("")))
 
-            flagListViewModel.getFlags()
+            flagListViewModel = FlagListViewModel(repo)
+            flagListViewModel.flags.observeForever(observer)
 
             observer.assertChangedValues(
                 listOf(

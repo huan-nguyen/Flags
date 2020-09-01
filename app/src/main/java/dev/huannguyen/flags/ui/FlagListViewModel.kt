@@ -2,10 +2,9 @@ package dev.huannguyen.flags.ui
 
 import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.asLiveData
 import dev.huannguyen.flags.R
 import dev.huannguyen.flags.data.DataResponse
 import dev.huannguyen.flags.data.FlagDataModel
@@ -13,27 +12,19 @@ import dev.huannguyen.flags.data.FlagRepo
 import dev.huannguyen.flags.data.FlagRepoImpl
 import dev.huannguyen.flags.di.NetworkComponent
 import dev.huannguyen.flags.domain.Flag
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
-class FlagListViewModel(private val repo: FlagRepo) : ViewModel() {
+class FlagListViewModel(repo: FlagRepo) : ViewModel() {
+    val flags: LiveData<UiState> = repo.flags()
+        .map { it.toUiState() }
+        .onStart { emit(UiState.InProgress) }
+        .asLiveData()
+}
 
-    private val flagData: MutableLiveData<UiState> = MutableLiveData()
-    val flags: LiveData<UiState> = flagData
-
-    fun getFlags() = viewModelScope.launch {
-        // Start with in progress state before any result comes back
-        flagData.value = UiState.InProgress
-
-        when (val response = repo.getFlags()) {
-            is DataResponse.Success -> {
-                flagData.value = UiState.Success(data = response.data.map { it.toFlagModel() })
-            }
-
-            is DataResponse.Failure -> {
-                flagData.value = UiState.Failure(message = R.string.flag_list_error_message)
-            }
-        }
-    }
+private fun DataResponse<List<FlagDataModel>>.toUiState() = when (this) {
+    is DataResponse.Success -> UiState.Success(data = data.map { it.toFlagModel() })
+    is DataResponse.Failure -> UiState.Failure(message = R.string.flag_list_error_message)
 }
 
 /**

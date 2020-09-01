@@ -1,28 +1,23 @@
 package dev.huannguyen.flags.data
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import timber.log.Timber
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 interface FlagRepo {
-    suspend fun getFlags(): DataResponse<List<FlagDataModel>>
+    fun flags(): Flow<DataResponse<List<FlagDataModel>>>
 }
 
 class FlagRepoImpl(
     private val webServices: WebServices
 ) : FlagRepo {
-    override suspend fun getFlags(): DataResponse<List<FlagDataModel>> = withContext(Dispatchers.IO) {
-        try {
-            val response = webServices.getFlags()
-            response.body()?.let { data ->
-                return@withContext DataResponse.Success(data)
-            }
-        } catch (exception: Exception) {
-            // Doing this for simplicity.
-            // Should have been something more useful like logging error to reporting tool like Crashlytics or New Relic
-            Timber.e("Unable to retrieve data from network.")
-        }
-
-        return@withContext DataResponse.Failure("Unable to retrieve data")
+    override fun flags(): Flow<DataResponse<List<FlagDataModel>>> = flow {
+        webServices.getFlags().body()?.let { data ->
+            emit(DataResponse.Success(data))
+        } ?: emit(DataResponse.Failure("Unable to retrieve data"))
     }
+        .catch { emit(DataResponse.Failure("Unable to retrieve data")) }
+        .flowOn(Dispatchers.IO)
 }
