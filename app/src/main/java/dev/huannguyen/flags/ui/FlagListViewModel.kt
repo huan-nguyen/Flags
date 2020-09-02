@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
-import timber.log.Timber
 
 class FlagListViewModel(private val repo: FlagRepo) : ViewModel() {
     private val fetchEvents = BroadcastChannel<Unit>(1)
@@ -39,11 +38,6 @@ class FlagListViewModel(private val repo: FlagRepo) : ViewModel() {
             .distinctUntilChanged()
             .onStart { emit(UiState.InProgress) }
             .asLiveData()
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        Timber.d("cleared")
     }
 }
 

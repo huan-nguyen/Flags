@@ -4,16 +4,15 @@ import dev.huannguyen.flags.data.source.local.LocalFlagData
 import dev.huannguyen.flags.data.source.local.LocalFlagDataSource
 import dev.huannguyen.flags.data.source.remote.RemoteFlagDataSource
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.withContext
 
 interface FlagRepo {
     fun flags(): Flow<List<LocalFlagData>>
     fun fetch(): Flow<DataResponse<List<LocalFlagData>>>
-    fun sync()
+    suspend fun sync()
 }
 
 class FlagRepoImpl(
@@ -25,19 +24,22 @@ class FlagRepoImpl(
         localDataSource.getFlags().flowOn(Dispatchers.IO)
 
     override fun fetch(): Flow<DataResponse<List<LocalFlagData>>> = flow {
-        try {
-            delay(9000)
-            val flags = remoteDataSource.fetch().map { it.toLocalData() }
-            localDataSource.saveFlags(flags)
-            emit(DataResponse.Success(flags))
-        } catch (exception: Exception) {
-            emit(DataResponse.Failure("Unable to fetch flags"))
+        emit(DataResponse.Fetching)
+        emit(fetchAndCacheData())
+    }
+
+    override suspend fun sync() {
+        fetchAndCacheData()
+    }
+
+    private suspend fun fetchAndCacheData(): DataResponse<List<LocalFlagData>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val flags = remoteDataSource.fetch().map { it.toLocalData() }
+                localDataSource.saveFlags(flags)
+                DataResponse.Success(flags)
+            } catch (exception: Exception) {
+                DataResponse.Failure("Error occurs while syncing flags data")
+            }
         }
-    }
-        .onStart { emit(DataResponse.Fetching) }
-        .flowOn(Dispatchers.IO)
-
-    override fun sync() {
-
-    }
 }
