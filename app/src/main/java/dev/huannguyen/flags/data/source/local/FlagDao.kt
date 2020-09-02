@@ -11,6 +11,6 @@ interface FlagDao {
     @Query("SELECT * FROM LocalFlagData")
     fun getAll(): Flow<List<LocalFlagData>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertAll(data: List<LocalFlagData>)
 }
