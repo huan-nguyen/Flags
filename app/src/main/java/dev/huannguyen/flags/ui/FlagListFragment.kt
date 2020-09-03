@@ -1,5 +1,7 @@
 package dev.huannguyen.flags.ui
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,9 +14,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import dev.huannguyen.flags.R
+import dev.huannguyen.flags.connectivity.ConnectivityStatus
+import dev.huannguyen.flags.di.ServiceLocator
 import dev.huannguyen.flags.domain.Flag
-import kotlinx.android.synthetic.main.list_fragment.errorMessage
+import dev.huannguyen.flags.ui.utils.hide
+import dev.huannguyen.flags.ui.utils.show
+import kotlinx.android.synthetic.main.list_fragment.connectivityStatus
 import kotlinx.android.synthetic.main.list_fragment.flagList
 import kotlinx.android.synthetic.main.list_fragment.swipeToRefresh
 import kotlinx.coroutines.flow.launchIn
@@ -34,6 +41,7 @@ class FlagListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupFlagList()
         subscribeToData(view)
+        subscribeToConnectivityStatus()
 
         if (viewModel.flags.value != null) {
             // Used for shared element transition. We need to postpone the transition until the data is loaded
@@ -74,7 +82,6 @@ class FlagListFragment : Fragment() {
         viewModel.flags.observe(viewLifecycleOwner, { state ->
             when (state) {
                 is UiState.Success -> {
-                    errorMessage.hide()
                     swipeToRefresh.isRefreshing = false
                     flagList.show()
                     (flagList.adapter as FlagAdapter).set(state.data)
@@ -82,13 +89,10 @@ class FlagListFragment : Fragment() {
 
                 is UiState.Failure -> {
                     swipeToRefresh.isRefreshing = false
-                    flagList.hide()
-                    errorMessage.show()
-                    errorMessage.text = getString(state.message)
+                    Snackbar.make(view, R.string.flag_list_error_message, Snackbar.LENGTH_LONG).show()
                 }
 
                 is UiState.InProgress -> {
-                    errorMessage.hide()
                     swipeToRefresh.isRefreshing = true
                 }
             }
@@ -99,12 +103,25 @@ class FlagListFragment : Fragment() {
             }
         })
     }
-}
 
-fun View.hide() {
-    visibility = View.GONE
-}
-
-fun View.show() {
-    visibility = View.VISIBLE
+    private fun subscribeToConnectivityStatus() {
+        ServiceLocator.connectivityListener.statuses
+            .onEach { status ->
+                connectivityStatus.set(status) {
+                    connectivityStatus.show()
+                    if (status == ConnectivityStatus.Connected) {
+                        connectivityStatus.animate()
+                            .alpha(1f)
+                            .setStartDelay(3000)
+                            .setDuration(2000)
+                            .setListener(object : AnimatorListenerAdapter() {
+                                override fun onAnimationEnd(animation: Animator) {
+                                    connectivityStatus?.hide()
+                                }
+                            })
+                    }
+                }
+            }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
+    }
 }

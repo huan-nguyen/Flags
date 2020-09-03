@@ -8,6 +8,8 @@
   <string name="language">Language</string>
   <string name="currency">Currency</string>
   <string name="timezone">Timezone</string>
+    <string name="back_online">Back online</string>
+  <string name="connection_lost">Connection lost</string>
 
 </resources>
 
