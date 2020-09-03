@@ -8,6 +8,7 @@ import dev.huannguyen.flags.App
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 interface ConnectivityListener {
     val statuses: Flow<ConnectivityStatus>
@@ -19,7 +20,7 @@ enum class ConnectivityStatus {
 
 class ConnectivityListenerImpl(app: App) : ConnectivityListener {
     private val statusChannel = ConflatedBroadcastChannel<ConnectivityStatus>()
-    override val statuses: Flow<ConnectivityStatus> = statusChannel.asFlow()
+    override val statuses: Flow<ConnectivityStatus> = statusChannel.asFlow().distinctUntilChanged()
 
     init {
         val connectivityManager = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -27,7 +28,7 @@ class ConnectivityListenerImpl(app: App) : ConnectivityListener {
         connectivityManager.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 // Avoid emitting status when app starts
-                if (statusChannel.valueOrNull == ConnectivityStatus.Disconnected) {
+                if (statusChannel.valueOrNull != null) {
                     statusChannel.offer(ConnectivityStatus.Connected)
                 }
             }

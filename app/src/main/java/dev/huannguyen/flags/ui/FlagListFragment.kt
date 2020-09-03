@@ -63,7 +63,7 @@ class FlagListFragment : Fragment() {
         flagList.adapter = FlagAdapter().also {
             it.clicks
                 .onEach { (view, data) -> showDetails(view, data) }
-                .launchIn(lifecycleScope)
+                .launchIn(viewLifecycleOwner.lifecycleScope)
         }
     }
 
