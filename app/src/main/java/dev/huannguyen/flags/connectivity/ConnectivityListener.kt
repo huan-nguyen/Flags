@@ -5,10 +5,11 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import dev.huannguyen.flags.App
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.BroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.onStart
 
 interface ConnectivityListener {
     val statuses: Flow<ConnectivityStatus>
@@ -19,43 +20,36 @@ enum class ConnectivityStatus {
 }
 
 class ConnectivityListenerImpl(app: App) : ConnectivityListener {
-    private val statusChannel = ConflatedBroadcastChannel<ConnectivityStatus>()
-    override val statuses: Flow<ConnectivityStatus> = statusChannel.asFlow().distinctUntilChanged()
+    private val connectivityManager = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    private val statusChannel = BroadcastChannel<ConnectivityStatus>(1)
+    override val statuses: Flow<ConnectivityStatus> = statusChannel.asFlow()
+        .distinctUntilChanged()
+        .onStart { if (!isConnected()) emit(ConnectivityStatus.Disconnected) }
 
     init {
-        val connectivityManager = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
         connectivityManager.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
-                // Avoid emitting status when app starts
-                if (statusChannel.valueOrNull != null) {
-                    statusChannel.offer(ConnectivityStatus.Connected)
-                }
+                statusChannel.offer(ConnectivityStatus.Connected)
             }
 
             override fun onLost(network: Network) {
                 statusChannel.offer(ConnectivityStatus.Disconnected)
             }
         })
+    }
 
-        // Emit the initial status if it is Disconnected. Having to do this since if the
-        // initial status is Disconnected, it is not picked up by the NetworkCallback.
-        var initStatus = ConnectivityStatus.Disconnected
-
+    private fun isConnected(): Boolean {
         // Retrieve current status of connectivity
         connectivityManager.allNetworks.forEach { network ->
             val networkCapability = connectivityManager.getNetworkCapabilities(network)
 
             networkCapability?.let {
                 if (it.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
-                    initStatus = ConnectivityStatus.Connected
-                    return@forEach
+                    return true
                 }
             }
         }
 
-        if (initStatus == ConnectivityStatus.Disconnected) {
-            statusChannel.offer(initStatus)
-        }
+        return false
     }
 }
