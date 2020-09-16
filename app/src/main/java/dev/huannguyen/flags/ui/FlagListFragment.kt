@@ -54,13 +54,14 @@ class FlagListFragment : Fragment() {
         }.launchIn(lifecycleScope)
     }
 
-    private fun setupFlagList() {
-        flagList.layoutManager = GridLayoutManager(
+    private fun setupFlagList() = flagList.run {
+        setHasFixedSize(true)
+        layoutManager = GridLayoutManager(
             context,
             if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) 2 else 3
         )
 
-        flagList.adapter = FlagAdapter().also {
+        adapter = FlagAdapter().also {
             it.clicks
                 .onEach { (view, data) -> showDetails(view, data) }
                 .launchIn(viewLifecycleOwner.lifecycleScope)
@@ -84,7 +85,7 @@ class FlagListFragment : Fragment() {
                 is UiState.Success -> {
                     swipeToRefresh.isRefreshing = false
                     flagList.show()
-                    (flagList.adapter as FlagAdapter).set(state.data)
+                    (flagList.adapter as FlagAdapter).submitList(state.data)
                 }
 
                 is UiState.Failure -> {
