@@ -2,7 +2,7 @@ package dev.huannguyen.flags.ui
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import com.squareup.picasso.Picasso
+import com.bumptech.glide.Glide
 import dev.huannguyen.flags.domain.Flag
 import kotlinx.android.synthetic.main.flag_item.view.imageView
 import kotlinx.android.synthetic.main.flag_item.view.name
@@ -23,7 +23,7 @@ class FlagViewHolder(
     fun populate(data: Flag) {
         this.data = data
         data.run {
-            Picasso.get()
+            Glide.with(itemView)
                 .load(url)
                 .into(itemView.imageView)
 

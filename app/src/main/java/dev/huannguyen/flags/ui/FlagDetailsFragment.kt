@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.transition.TransitionInflater
-import com.squareup.picasso.Picasso
+import com.bumptech.glide.Glide
 import dev.huannguyen.flags.R
 import dev.huannguyen.flags.domain.Flag
 import kotlinx.android.synthetic.main.details_fragment.capital
@@ -31,7 +31,7 @@ class FlagDetailsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Picasso.get()
+        Glide.with(this)
             .load(flag.url)
             .into(imageView)
 
