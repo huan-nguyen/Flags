@@ -58,6 +58,7 @@ dependencies {
     implementation "io.github.reactivecircus.flowbinding:flowbinding-android:1.0.0-alpha02"
     implementation "io.github.reactivecircus.flowbinding:flowbinding-swiperefreshlayout:1.0.0-alpha02"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    implementation "com.squareup.okhttp3:logging-interceptor:4.9.0"
 
     debugImplementation 'com.squareup.retrofit2:retrofit-mock:2.9.0'
 
