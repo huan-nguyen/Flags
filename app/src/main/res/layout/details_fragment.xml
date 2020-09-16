@@ -1,119 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:clipChildren="false"
-  android:clipToPadding="false"
-  android:orientation="vertical">
-  
-  <ImageView
-    android:id="@+id/imageView"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:adjustViewBounds="true"
-    android:foreground="@drawable/ripple"
-    tools:ignore="ContentDescription"
-    tools:src="@android:color/white" />
-  
-  <FrameLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    
-    <TableLayout
-      android:id="@+id/detail_group"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:background="?android:attr/colorBackground"
-      android:padding="12dp">
-      
-      <TableRow android:padding="12dp">
-        
-        <TextView
-          style="@style/CountryDataLabel"
-          android:layout_width="0dp"
-          android:layout_height="wrap_content"
-          android:text="@string/capital" />
-        
-        <TextView
-          android:id="@+id/capital"
-          style="@style/CountryDataValue"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content" />
-      </TableRow>
-      
-      <TableRow android:padding="12dp">
-        
-        <TextView
-          style="@style/CountryDataLabel"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="@string/population" />
-        
-        <TextView
-          android:id="@+id/population"
-          style="@style/CountryDataValue"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content" />
-      </TableRow>
-      
-      <TableRow android:padding="12dp">
-        
-        <TextView
-          style="@style/CountryDataLabel"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="@string/language" />
-        
-        <TextView
-          android:id="@+id/language"
-          style="@style/CountryDataValue"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content" />
-      </TableRow>
-      
-      <TableRow android:padding="12dp">
-        
-        <TextView
-          style="@style/CountryDataLabel"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="@string/currency" />
-        
-        <TextView
-          android:id="@+id/currency"
-          style="@style/CountryDataValue"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content" />
-      </TableRow>
-      
-      <TableRow android:padding="12dp">
-        
-        <TextView
-          style="@style/CountryDataLabel"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="@string/timezone" />
-        
-        <TextView
-          android:id="@+id/timeZone"
-          style="@style/CountryDataValue"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content" />
-      </TableRow>
-    </TableLayout>
-    
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-      android:id="@+id/favourite_fab"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_gravity="top|end"
-      android:layout_marginTop="@dimen/fab_margin_vertical"
-      android:layout_marginEnd="@dimen/fab_margin_right"
-      android:layout_marginRight="@dimen/fab_margin_right"
-      android:scaleType="center"
-      app:fabSize="normal"
-      app:srcCompat="@drawable/ic_favorite" />
-  </FrameLayout>
+    android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:orientation="vertical">
+
+    <dev.huannguyen.flags.ui.utils.FourThreeImageView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:foreground="@drawable/ripple"
+        android:scaleType="centerCrop"
+        tools:ignore="ContentDescription"
+        tools:src="@android:color/white" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TableLayout
+            android:id="@+id/detail_group"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?android:attr/colorBackground"
+            android:padding="12dp">
+
+            <TableRow android:padding="12dp">
+
+                <TextView
+                    style="@style/CountryDataLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/capital" />
+
+                <TextView
+                    android:id="@+id/capital"
+                    style="@style/CountryDataValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+
+            <TableRow android:padding="12dp">
+
+                <TextView
+                    style="@style/CountryDataLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/population" />
+
+                <TextView
+                    android:id="@+id/population"
+                    style="@style/CountryDataValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+
+            <TableRow android:padding="12dp">
+
+                <TextView
+                    style="@style/CountryDataLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/language" />
+
+                <TextView
+                    android:id="@+id/language"
+                    style="@style/CountryDataValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+
+            <TableRow android:padding="12dp">
+
+                <TextView
+                    style="@style/CountryDataLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/currency" />
+
+                <TextView
+                    android:id="@+id/currency"
+                    style="@style/CountryDataValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+
+            <TableRow android:padding="12dp">
+
+                <TextView
+                    style="@style/CountryDataLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/timezone" />
+
+                <TextView
+                    android:id="@+id/timeZone"
+                    style="@style/CountryDataValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </TableRow>
+        </TableLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/favourite_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="@dimen/fab_margin_vertical"
+            android:layout_marginEnd="@dimen/fab_margin_right"
+            android:layout_marginRight="@dimen/fab_margin_right"
+            android:scaleType="center"
+            app:fabSize="normal"
+            app:srcCompat="@drawable/ic_favorite" />
+    </FrameLayout>
 </LinearLayout>
