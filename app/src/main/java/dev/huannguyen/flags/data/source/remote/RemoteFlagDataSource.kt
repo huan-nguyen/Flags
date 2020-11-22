@@ -9,7 +9,11 @@ interface RemoteFlagDataSource {
 
 class RemoteFlagDataSourceImpl(private val webServices: WebServices) : RemoteFlagDataSource {
     override suspend fun fetch(): List<RemoteFlagData> {
-        return webServices.getFlags().body() ?: throw FetchErrorException
+        try {
+            return webServices.getFlags().body() ?: throw FetchErrorException
+        } catch (exception: Exception) {
+            throw FetchErrorException
+        }
     }
 }
 

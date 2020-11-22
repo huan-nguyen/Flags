@@ -23,8 +23,8 @@ class ConnectivityListenerImpl(app: App) : ConnectivityListener {
     private val connectivityManager = app.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     private val statusChannel = BroadcastChannel<ConnectivityStatus>(1)
     override val statuses: Flow<ConnectivityStatus> = statusChannel.asFlow()
-        .distinctUntilChanged()
         .onStart { if (!isConnected()) emit(ConnectivityStatus.Disconnected) }
+        .distinctUntilChanged()
 
     init {
         connectivityManager.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {

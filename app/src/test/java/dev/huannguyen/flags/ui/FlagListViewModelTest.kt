@@ -2,25 +2,23 @@ package dev.huannguyen.flags.ui
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.whenever
 import dev.huannguyen.flags.CoroutineTestRule
-import dev.huannguyen.flags.R
 import dev.huannguyen.flags.data.DataResponse
-import dev.huannguyen.flags.data.FlagDataModel
 import dev.huannguyen.flags.data.FlagRepo
+import dev.huannguyen.flags.data.source.local.LocalFlagData
 import dev.huannguyen.flags.domain.Flag
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
-import org.junit.After
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
+// TODO add all necessary tests
 class FlagListViewModelTest {
-    private lateinit var repo: FlagRepo
+    private lateinit var repo: FakeFlagRepo
     private lateinit var observer: LiveDataTestObserver<UiState>
     private lateinit var flagListViewModel: FlagListViewModel
 
@@ -33,20 +31,14 @@ class FlagListViewModelTest {
 
     @Before
     fun setup() {
-        repo = mock()
         observer = LiveDataTestObserver()
-    }
-
-    @After
-    fun tearDown() {
-        flagListViewModel.flags.removeObserver(observer)
     }
 
     @Test
     fun `If flagRepo returns proper data, produce InProgress and then Success UiState`() =
-        runBlocking {
+        runBlockingTest {
             val fakeFlagData = listOf(
-                FlagDataModel(
+                LocalFlagData(
                     "Australia",
                     "Canberra",
                     24117360,
@@ -55,7 +47,7 @@ class FlagListViewModelTest {
                     "Australian dollar",
                     "UTC+10:00"
                 ),
-                FlagDataModel(
+                LocalFlagData(
                     "Finland",
                     "Helsinki",
                     5491817,
@@ -66,8 +58,7 @@ class FlagListViewModelTest {
                 )
             )
 
-            whenever(repo.flags()).thenReturn(flowOf(DataResponse.Success(fakeFlagData)))
-
+            repo = FakeFlagRepo(FakeFlagRepo.Data(fakeFlagData, emptyList()))
             flagListViewModel = FlagListViewModel(repo)
             flagListViewModel.flags.observeForever(observer)
 
@@ -99,22 +90,6 @@ class FlagListViewModelTest {
                 )
             )
         }
-
-    @Test
-    fun `If flagRepo returns error, produce InProgress and then Failure UiState`() =
-        runBlocking {
-            whenever(repo.flags()).thenReturn(flowOf(DataResponse.Failure("")))
-
-            flagListViewModel = FlagListViewModel(repo)
-            flagListViewModel.flags.observeForever(observer)
-
-            observer.assertChangedValues(
-                listOf(
-                    UiState.InProgress,
-                    UiState.Failure(message = R.string.flag_list_error_message)
-                )
-            )
-        }
 }
 
 class LiveDataTestObserver<T> : Observer<T> {
@@ -127,4 +102,14 @@ class LiveDataTestObserver<T> : Observer<T> {
     fun assertChangedValues(values: List<T>) {
         assertEquals(values, this.values)
     }
+}
+
+class FakeFlagRepo(private val data: Data) : FlagRepo {
+    class Data(val flags: List<LocalFlagData>, val fetch: List<LocalFlagData>)
+
+    override fun flags(): Flow<List<LocalFlagData>> = flowOf(data.flags)
+
+    override fun fetch(): Flow<DataResponse<List<LocalFlagData>>> = flowOf(DataResponse.Success(data.fetch))
+
+    override suspend fun sync() {}
 }
